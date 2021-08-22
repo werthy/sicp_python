@@ -1,0 +1,5 @@
+*.zip
+
+test/.*
+# 数据文件详见官网
+trends/data
