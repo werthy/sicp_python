@@ -625,10 +625,15 @@ class QueenPlace:
     """
     def __init__(self, colony_queen, ant_queen):
         "*** YOUR CODE HERE ***"
+        self.__colony_queen = colony_queen
+        self.__ant_queen = ant_queen
 
     @property
     def bees(self):
         "*** YOUR CODE HERE ***"
+        self.__bees = self.__colony_queen.bees[:]
+        self.__bees.extend(self.__ant_queen.bees[:])
+        return self.__bees
 
 class QueenAnt(ScubaThrower):
     """The Queen of the colony.  The game is over if a bee enters her place."""
