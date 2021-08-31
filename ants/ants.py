@@ -69,7 +69,10 @@ class Place:
             if insect.container and insect.ant:
                 self.ant = insect.ant
             else:
-                self.ant = None
+                if isinstance(insect, QueenAnt) and not insect.imposter:
+                    return
+                else:
+                    self.ant = None
         insect.place = None
 
     def __str__(self):
@@ -640,16 +643,45 @@ class QueenAnt(ScubaThrower):
 
     name = 'Queen'
     "*** YOUR CODE HERE ***"
-    implemented = False
+    implemented = True
+    food_cost = 6
+    is_imposter = False
 
     def __init__(self):
         ScubaThrower.__init__(self, 1)
         "*** YOUR CODE HERE ***"
+        if not QueenAnt.is_imposter:
+            self.imposter = False
+            QueenAnt.is_imposter = True
+        else:
+            self.imposter = True
+        self.__doubled_ants = [self]
 
     def action(self, colony):
         """A queen ant throws a leaf, but also doubles the damage of ants
         in her tunnel.  Impostor queens do only one thing: die."""
         "*** YOUR CODE HERE ***"
+        if self.imposter:
+            self.reduce_armor(self.armor)
+        else:
+            queen_place = QueenPlace(colony.queen, self.place)
+            colony.queen = queen_place
+            entrance = self.place
+            while entrance:
+                if (entrance.ant and entrance.ant not in self.__doubled_ants):
+                    entrance.ant.damage = 2 * entrance.ant.damage
+                    self.__doubled_ants.append(entrance.ant)
+                    if entrance.ant.container and entrance.ant.ant:
+                        entrance.ant.ant.damage = 2 * entrance.ant.ant.damage
+                        self.__doubled_ants.append(entrance.ant)
+                entrance = entrance.entrance
+            exit = self.place.exit
+            while exit:
+                if (exit.ant and exit.ant not in self.__doubled_ants):
+                    exit.ant.damage = 2 * exit.ant.damage
+                    self.__doubled_ants.append(exit.ant)
+                exit = exit.exit
+            super().action(colony)
 
 class AntRemover(Ant):
     """Allows the player to remove ants from the board in the GUI."""
