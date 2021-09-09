@@ -104,12 +104,15 @@ def play(strategy0, strategy1, goal=GOAL_SCORE):
     score, opponent_score = 0, 0
     "*** YOUR CODE HERE ***"
     while max(score, opponent_score) < goal:
+        # Hog Wild
         dice_type = select_dice(score, opponent_score)
         if who == 0:
+            # 对手的得分 FreeBacon
             score += take_turn(strategy0(score, opponent_score), opponent_score, dice_type)
         else:
             opponent_score += take_turn(strategy1(opponent_score, score), score, dice_type)
         who = other(who)
+        # Swine Swap
         if 2 * score == opponent_score or opponent_score * 2 == score:
             score, opponent_score = opponent_score, score
     return score, opponent_score  # You may wish to change this line.
