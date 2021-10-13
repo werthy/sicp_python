@@ -113,7 +113,6 @@ nil = nil() # Assignment hides the nil class; there is only one instance
 
 # Scheme list parser
 
-
 def scheme_read(src):
     """Read the next expression from SRC, a Buffer of tokens.
 
@@ -135,6 +134,7 @@ def scheme_read(src):
         return val
     elif val == "'":
         "*** YOUR CODE HERE ***"
+        return Pair('quote', Pair(scheme_read(src), nil)) 
     elif val == "(":
         return read_tail(src)
     else:
@@ -167,7 +167,14 @@ def read_tail(src):
             src.pop()
             return nil
         "*** YOUR CODE HERE ***"
-        first = scheme_read(src)
+        if src.current() == ".":
+            src.pop()
+            first = scheme_read(src)
+            next = src.current()
+            if next != ")":
+                raise SyntaxError("Expected one element after .")
+        else:
+            first = scheme_read(src)
         rest = read_tail(src)
         return Pair(first, rest)
     except EOFError:
