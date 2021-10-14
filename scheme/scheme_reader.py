@@ -135,6 +135,7 @@ def scheme_read(src):
     elif val == "'":
         "*** YOUR CODE HERE ***"
         return Pair('quote', Pair(scheme_read(src), nil)) 
+        # return Pair('quote', scheme_read(src)) 
     elif val == "(":
         return read_tail(src)
     else:
@@ -173,10 +174,13 @@ def read_tail(src):
             next = src.current()
             if next != ")":
                 raise SyntaxError("Expected one element after .")
+            else:
+                src.pop()
+            return first
         else:
             first = scheme_read(src)
-        rest = read_tail(src)
-        return Pair(first, rest)
+            rest = read_tail(src)
+            return Pair(first, rest)
     except EOFError:
         raise SyntaxError("unexpected end of file")
 
