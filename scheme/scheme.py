@@ -53,13 +53,14 @@ def scheme_eval(expr, env):
         args = rest.map(lambda operand: scheme_eval(operand, env))
         return scheme_apply(procedure, args, env)
 
-
 def scheme_apply(procedure, args, env):
     """Apply Scheme PROCEDURE to argument values ARGS in environment ENV."""
     if isinstance(procedure, PrimitiveProcedure):
         return apply_primitive(procedure, args, env)
     elif isinstance(procedure, LambdaProcedure):
         "*** YOUR CODE HERE ***"
+        frame = procedure.env.make_call_frame(procedure.formals, args)
+        return scheme_eval(procedure.body, frame)
     elif isinstance(procedure, MuProcedure):
         "*** YOUR CODE HERE ***"
     else:
@@ -139,6 +140,11 @@ class Frame:
         """
         frame = Frame(self)
         "*** YOUR CODE HERE ***"
+        if len(formals) == len(vals):
+            for i in range(len(formals)):
+                frame.bindings[formals[i]] = vals[i]
+        else:
+            raise SchemeError("different number of formals and vals")
         return frame
 
     def define(self, sym, val):
@@ -203,6 +209,11 @@ def do_lambda_form(vals, env):
     formals = vals[0]
     check_formals(formals)
     "*** YOUR CODE HERE ***"
+    if len(vals) == 2:
+        process = LambdaProcedure(formals, vals[1] , env)
+    else:
+        process = LambdaProcedure(formals, Pair('begin', vals.second), env)
+    return process
 
 def do_mu_form(vals):
     """Evaluate a mu form with parameters VALS."""
@@ -219,10 +230,19 @@ def do_define_form(vals, env):
         check_form(vals, 2, 2)
         "*** YOUR CODE HERE ***"
         global_frame = env.global_frame()
-        global_frame.bindings[target] = vals[1]
+        # 这里如果不用 scheme_eval 去求vals[1]的值，遇到定义lambda等情况时，就没能把变量的值绑定到过程
+        # 而是绑定到了 一个Pair表达式上去了....
+        global_frame.bindings[target] = scheme_eval(vals[1], env)
         return target
     elif isinstance(target, Pair):
         "*** YOUR CODE HERE ***"
+        symbol = target.first
+        if scheme_symbolp(symbol):
+            global_frame = env.global_frame()
+            global_frame.bindings[symbol] = do_lambda_form(Pair(target.second, vals.second), env)
+            return symbol
+        else:
+            raise SchemeError("bad name to define")
     else:
         raise SchemeError("bad argument to define")
 
@@ -302,6 +322,13 @@ def do_begin_form(vals, env):
     """Evaluate begin form with parameters VALS in environment ENV."""
     check_form(vals, 1)
     "*** YOUR CODE HERE ***"
+    # for i in range(0,len(vals)-1):
+    #     scheme_eval(vals[i], env)
+    # return vals[len(vals)-1]
+    if vals.second == nil:
+        return vals.first
+    scheme_eval(vals.first, env)
+    return do_begin_form(vals.second, env)
 
 LOGIC_FORMS = {
         "and": do_and_form,
@@ -333,6 +360,14 @@ def check_formals(formals):
     >>> check_formals(read_line("(a b c)"))
     """
     "*** YOUR CODE HERE ***"
+    formal_list = []
+    for formal in formals:
+        if not scheme_symbolp(formal):
+            raise SchemeError("not valid formal")
+        if formal in formal_list:
+            raise SchemeError("repeated formal")
+        formal_list.append(formal)
+    return formals
 
 ##################
 # Tail Recursion #
