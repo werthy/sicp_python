@@ -309,7 +309,7 @@ one-through-four
 
 (cons 5 one-through-four)
 ; expect (5 1 2 3 4)
-;; 从这开始吧
+
 (define (map proc items)
   (if (null? items)
       nil

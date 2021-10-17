@@ -80,8 +80,10 @@ def apply_primitive(procedure, args, env):
     "*** YOUR CODE HERE ***"
     args_list = []
     def add_arg(x):
-        if x != nil:
-            args_list.append(x)
+        # nil 完全可以是参数
+        # 应该加入到参数列表中
+        # if x != nil:
+        args_list.append(x)
     args.map(add_arg)
     if procedure.use_env:
         args_list.append(env)
