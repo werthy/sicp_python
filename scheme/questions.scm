@@ -24,7 +24,14 @@
 ;; the merged lists.
 (define (merge comp list1 list2)
     ; *** YOUR CODE HERE ***
-    nil)
+    (cond ((null? list1) list2)
+          ((null? list2) list1)
+          ((comp (car list1) (car list2))
+           (cons (car list1)
+                 (merge comp (cdr list1) list2)))
+          (else
+           (cons (car list2)
+                 (merge comp list1 (cdr list2))))))
 
 (merge < '(1 5 7 9) '(4 8 10))
 ; expect (1 4 5 7 8 9 10)
@@ -64,7 +71,18 @@
 ;; be at most MAX-VALUE and there are at most MAX-PIECES partitions.
 (define (list-partitions total max-pieces max-value)
   ; *** YOUR CODE HERE ***
-  nil)
+  (construct total max-pieces max-value nil)
+  )
+
+(define (construct total max-pieces max-value list)
+  (cond ((eq? total 0) (cons list nil))
+        ((eq? max-pieces 0) nil)
+        ((eq? max-value 0) nil)
+        ((< total 0) nil)
+        (else (append 
+                (construct (- total max-value) (- max-pieces 1) max-value (cons max-value list))
+                (construct total max-pieces (- max-value 1) list))))
+)
 
 ; Problem 19 tests rely on correct Problem 18.
 (sort-lists (list-partitions 5 2 4))
@@ -110,7 +128,21 @@
 ;; possible path from root to leaf.
 (define (tree-sums tree)
   ; *** YOUR CODE HERE ***
-  nil)
+  (tree-sum-rec tree 0 '()))
+
+;; 当前数据结构，似乎没办法从孩子转到下一个孩子
+;; 所以也就是说递归不行？必须迭代喽？
+;; 我这一晚上（2个小时）都浪费到哪去了？
+(define (tree-sum-rec tree total list)
+        (if (or (null? (children tree)) (null? tree))  (begin (cons (+ total (entry tree)) nil))
+          (begin 
+            (display (tree-sum-rec (car (children tree)) (+ total (entry tree)) list))
+            (display (tree-sum-rec (cdr tree) (+ total (entry tree)) list))
+            (append
+              (tree-sum-rec (car (children tree)) (+ total (entry tree)) list)
+              (tree-sum-rec (cdr (list tree)) (+ total (entry tree)) list)
+            )
+          )))
 
 (tree-sums tree)
 ; expect (20 19 13 16 11)
@@ -118,7 +150,7 @@
 
 ; Problem 21 (optional)
 
-; Draw the hax image using turtle graphics.
-(define (hax d k)
-  ; *** YOUR CODE HERE ***
-  nil)
+;; Draw the hax image using turtle graphics.
+;(define (hax d k)
+;  ; *** YOUR CODE HERE ***
+;  nil)
